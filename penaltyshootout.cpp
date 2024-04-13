@@ -2,7 +2,10 @@
 #include <iostream>
 #include <vector>
 #include <math.h>
-//#include <bits/stdc++.h> 
+#include <cstring>
+
+
+#include <bits/stdc++.h> 
 
 #ifdef __APPLE__
 #  include <OpenGL/gl.h>
@@ -16,8 +19,10 @@
 
 #include "goalkeeper.h"
 #include "ball.h"
+#include "puck.h"
 #include "post.h"
-
+#include "SOIL.h"
+#include "imageio.h"
 using namespace std;
 
 bool isPaused = false;
@@ -46,11 +51,14 @@ float speedX = SPEEDXMINIMUM;
 float forceZ = FORCEZMINIMUM;
 float dirY = DIRYMINIMUM;
 float skey = false;
+bool isWhiteGround = false;
+
+
 
 Vec3D currRing = Vec3D();
 
-Ball soccerBall = Ball(0,0,0);
-
+Ball hockeyBall(0,0,0);
+Puck hockeyPuck(0,0,0);
 //Goalkeeper Initialization
 Goalkeeper gk = Goalkeeper(0.05, 1.35);
 
@@ -92,6 +100,68 @@ GLfloat planeMaterialShiny =
     0.6
 ;
 
+//GLuint grassTextureID, iceTextureID;
+
+/*void loadTextures() {
+    // Load grass texture
+    grassTextureID = SOIL_load_OGL_texture(
+        "grass_texture.jpg", // File path for grass texture
+        SOIL_LOAD_AUTO,
+        SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_INVERT_Y
+    );
+
+    // Load ice texture
+    iceTextureID = SOIL_load_OGL_texture(
+        "ice_texture.jpg", // File path for ice texture
+        SOIL_LOAD_AUTO,
+        SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_INVERT_Y
+    );
+}*/
+unsigned char *image;
+int width, height, bpp;
+
+int texImageWidth;
+int texImageHeight;
+
+GLubyte *makeTexImage(char *file){
+	int width, height;
+	GLubyte *texImage;
+	texImage = loadImageRGBA((char*) file, &width, &height);	
+	texImageWidth = width;
+	texImageHeight = height;
+	return texImage;
+}
+
+void load_texture(const char* filename){
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    GLubyte *texImage = makeTexImage((char*)filename);
+    if (!texImage) {
+        printf("\nError reading image \n");
+        return;
+    }
+    glBindTexture(GL_TEXTURE_2D, texture);
+    // Set the texture wrapping/filtering options
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texImageWidth, texImageWidth, 0, GL_RGBA, GL_UNSIGNED_BYTE, texImage);
+    delete[] texImage;
+}
+
+
+
+void drawObject() {
+    if (isWhiteGround) {
+        hockeyPuck.draw();  // Draw puck
+    } else {
+        hockeyBall.draw();  // Draw ball
+    }
+}
 void setMaterials(unsigned int index) {
     
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, materialAmbient[index]);
@@ -197,24 +267,50 @@ void drawHUD(){
 void createPlane(){
     glPushMatrix();
 
-    
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, planeMaterialAmbient);
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, planeMaterialDiffuse);
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, planeMaterialSpecular);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, planeMaterialShiny);
 
-    glColor3b(0, 60, 0);
+    // Enable texture mapping
+    glEnable(GL_TEXTURE_2D); 
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
+
+    if(isWhiteGround) {
+        // Bind grass texture
+        //glBindTexture(GL_TEXTURE_2D, iceTextureID);
+        
+        //glColor3f(1.0f, 1.0f, 1.0f);
+    } else {
+        // Bind ice texture
+        //glBindTexture(GL_TEXTURE_2D, grassTextureID);
+        
+        //glColor3b(0,60,0);
+    }
+
     glBegin(GL_QUADS);
 
     glNormal3f(0,0,1);
+
+// Specify texture coordinates
+    glTexCoord2f(0, 0);
     glVertex3f(-20,-10,0);
+
+    glTexCoord2f(1, 0);
     glVertex3f(20,-10,0);
+
+    glTexCoord2f(1, 1);
     glVertex3f(20,10,0);
+
+    glTexCoord2f(0, 1);
     glVertex3f(-20,10, 0);
 
     glEnd();
+
+    glDisable(GL_TEXTURE_2D); // Disable texture mapping after use
     glPopMatrix();
 }
+
 
 
 void reshape( int w, int h){
@@ -231,12 +327,12 @@ void reshape( int w, int h){
     glutPostRedisplay();
 }
 
-void initBall(){
-    soccerBall = Ball(forceZ , dirY, speedX);
-    
-    float speedX = SPEEDXMINIMUM;
-    float forceZ = FORCEZMINIMUM;
-    float dirY = DIRYMINIMUM;
+void initObject() {
+    if (isWhiteGround) {
+        hockeyPuck = Puck(forceZ , dirY, speedX);  // Initialize puck
+    } else {
+        hockeyBall = Ball(forceZ , dirY, speedX);  // Initialize ball
+    }
 }
 
 void targets(){
@@ -292,43 +388,64 @@ void targets(){
 
 
 
-void update(){
+void update() {
+    if (gameOngoing) {
+        if (isWhiteGround) {
+        	if (hockeyPuck.position.px >= 45) {
+                initObject();
+                skey = false;
+                score += 1;
+            } else if (hockeyPuck.speed <= -0.5) {
+                initObject();
+                skey = false;
+            } else if (skey) {
+                hockeyPuck.update();
+                Point3D temppos = hockeyPuck.position;
+                if (hockeyPuck.speed <= 0)
+                    hockeyPuck.speed -= 0.005;
 
-    if ( gameOngoing){
+                if (fabs(temppos.py - gk.position.py) <= 0.01) {
+                    //COLLISION!
+                    hockeyPuck.speed *= -1.0;
+                } else if (fabs(currRing.dy - hockeyPuck.position.py) <= 0.5 && fabs(currRing.dx - hockeyPuck.position.px) <= 0.5) {
+                    initObject();
+                    skey = false;
+                    score += 2;
+                }
+            }
+        } else {
+            // Update ball logic
+            if (hockeyBall.position.px >= 45) {
+                initObject();
+                skey = false;
+                score += 1;
+            } else if (hockeyBall.speed <= -0.5) {
+                initObject();
+                skey = false;
+            } else if (skey) {
+                hockeyBall.update();
+                Point3D temppos = hockeyBall.position;
+                if (hockeyBall.speed <= 0)
+                    hockeyBall.speed -= 0.005;
+
+                if (fabs(temppos.py - gk.position.py) <= 0.01) {
+                    //COLLISION!
+                    hockeyBall.speed *= -1.0;
+                } else if (fabs(currRing.dy - hockeyBall.position.py) <= 0.5 && fabs(currRing.dx - hockeyBall.position.px) <= 0.5) {
+                    initObject();
+                    skey = false;
+                    score += 2;
+                }
+            }
+        }
     
-    if (soccerBall.position.px >= 45){
-        initBall();
-        skey = false;
-        score += 1;
-    }
-    else if (soccerBall.speed <= -0.5){
-        initBall();
-        skey = false;
-    }
-    else if (skey){
-        soccerBall.update();
-        Point3D temppos = soccerBall.position;
-        if (soccerBall.speed <= 0)
-            soccerBall.speed -= 0.005;
-        
-        if ( fabs(temppos.py - gk.position.py) <= 0.01 ){
-            //COLLISION!
-            soccerBall.speed *= -1.0;
-        }
-        else if (fabs(currRing.dy - soccerBall.position.py) <= 0.5 && fabs(currRing.dx - soccerBall.position.px) <= 0.5){
-            initBall();
-            skey = false;
-            score += 2;
-        }
-    }
-    }
-    if ( cnt/60 == 60){
+    if (cnt / 60 == 60) {
         gameOverScreen = true;
         gameOngoing = false;
     }
-
-    
 }
+}
+
 
 void draw3DScene(){
     
@@ -348,7 +465,7 @@ void draw3DScene(){
     
     glTranslatef(2,0,1);
     update();
-    soccerBall.draw();
+    drawObject();
     glPopMatrix();    
     targets();
     gk.drawGK();
@@ -385,7 +502,16 @@ void kbd(unsigned char key, int x, int y)
 {
     switch(key){
         
-        
+        case 'i': 
+    	    isWhiteGround = !isWhiteGround;
+            if(isWhiteGround) {
+                //load_texture("ice_texture.png");
+            } else {
+                //load_texture("grass_texture.png");
+    	    }
+    	    initObject();
+            break;
+
         case 't':
             textX--;
             break;
@@ -408,7 +534,7 @@ void kbd(unsigned char key, int x, int y)
             break;
         case ' ':
             if (!AtMenu && gameOngoing){
-                initBall();
+                initObject();
             }
             break;
         case '1':
@@ -421,7 +547,7 @@ void kbd(unsigned char key, int x, int y)
             gk = Goalkeeper(0.1, 1.75);
             break;
         case 'r':
-            initBall();
+            initObject();
             gk = Goalkeeper(0.05, 1.35);
             score = 0;
             cnt = 0;
@@ -488,6 +614,7 @@ int main(int argc, char** argv)
            "down arrow -> decrease upward momentum of the kick\n"
            "left arrow -> angle kick to the left\n"
            "right arrow -> angle kick to the right\n"
+           "i-> change to ice hockey\n"
            "x -> increase speed of the ball\n"
            "c -> decrease speed of the ball\n"
            "r -> reset\n"
@@ -530,7 +657,9 @@ int main(int argc, char** argv)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	
-
+        
+        //load_texture("grass_texture.png");
+        load_texture("ice_texture.png");
 	glutKeyboardFunc(kbd);
     glutSpecialFunc(SpecialInput);
 	glutDisplayFunc(display);

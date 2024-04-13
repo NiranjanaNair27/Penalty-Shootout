@@ -13,6 +13,8 @@
 #include <vector>
 #include "mathLib3D.h"
 #include "objLoad.h"
+#include <cstring>
+
 using namespace std;
 
 objLoad::objLoad(string filename){

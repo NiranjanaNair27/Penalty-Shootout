@@ -9,6 +9,7 @@ Post::Post()
     this->numFaces = 6;
 }
 
+
 void Post::drawPostIndex()
 {
     for (int i = 0; i < this->numFaces; i++)
@@ -18,6 +19,7 @@ void Post::drawPostIndex()
         this->drawPost(i);
     }
 }
+
 
 void Post::drawNet()
 {
@@ -43,12 +45,39 @@ void Post::drawNet()
     glPopMatrix();
 }
 
+/*void Post::drawNet()
+{
+    //top
+    glPushMatrix();
+        glTranslatef(18, 0, 2.42);
+        glScalef(0.5, 15, 0.75); // Adjust scale factors to scale down
+        this->drawPostIndex();
+    glPopMatrix();
+
+    //right
+    glPushMatrix();
+        glTranslatef(18, 1.9, 1.2);
+        glScalef(0.5, 0.5, 5.875); // Adjust scale factors to scale down
+        this->drawPostIndex();
+    glPopMatrix();
+
+    //left
+    glPushMatrix();
+        glTranslatef(18, -1.9, 1.2);
+        glScalef(0.5, 0.5, 5.875); // Adjust scale factors to scale down
+        this->drawPostIndex();
+    glPopMatrix();
+}*/
+
+
+
 void Post::setColors(float r, float g, float b)
 {
     this->postColor[0] = r;
     this->postColor[1] = g;
     this->postColor[2] = b;
 }
+
 
 void Post::drawPost(int index)
 {

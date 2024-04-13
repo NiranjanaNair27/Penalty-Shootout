@@ -9,13 +9,13 @@
 #endif
 
 #include <math.h>
-#include "ball.h"
+#include "puck.h"
 #include <time.h>
 #include <stdlib.h>
 
 
 
-Ball::Ball(float forceZ, float dirY, float speedX){
+Puck::Puck(float forceZ, float dirY, float speedX){
     this->position = Point3D(0,0,0.5);
     // this->direction = Vec3D(1,static_cast <float> (rand()) / static_cast <float> (RAND_MAX) * 0.2 - 0.1 ,0);
     this->direction = Vec3D(1, dirY ,0);
@@ -24,7 +24,7 @@ Ball::Ball(float forceZ, float dirY, float speedX){
     this->gravity -= forceZ;
 }
 
-Ball::Ball(Point3D pos, Vec3D dir, float friction, float spd){
+Puck::Puck(Point3D pos, Vec3D dir, float friction, float spd){
     this->position = pos;
     this->direction = dir;
     this->friction = friction;
@@ -32,7 +32,7 @@ Ball::Ball(Point3D pos, Vec3D dir, float friction, float spd){
     
 }
 
-void Ball::update(){
+void Puck::update(){
 
     if ( this->position.pz < -0.35){
         this->initialGravity *= 0.9;
@@ -56,21 +56,7 @@ void Ball::update(){
 
 }
 
-void Ball::draw(){
-    glPushMatrix();
-        glColor3f(1.0, 1.0, 1.0);
-        glTranslatef(this->position.px, this->position.py, this->position.pz);
-        glPushMatrix();
-        glRotatef(270, 1, 0, 0);
-            glScalef(0.1, 0.1, 0.1);
-            
-            //loadBall.draw();
-            glutSolidSphere(1, 10, 10);
-        glPopMatrix();
-    glPopMatrix();
-}
-
-/*void Ball::draw() {
+void Puck::draw() {
     glPushMatrix();
     glColor3f(0, 0, 0);
     glTranslatef(this->position.px, this->position.py, this->position.pz);
@@ -113,7 +99,7 @@ void Ball::draw(){
     glEnd();
 
     glPopMatrix();
-}*/
+}
 
 
 

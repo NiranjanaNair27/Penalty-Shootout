@@ -1,0 +1,6 @@
+newmtl HockeyPuck
+Ka 0.2 0.2 0.2   # Ambient color (RGB)
+Kd 0.6 0.6 0.6   # Diffuse color (RGB)
+Ks 0.8 0.8 0.8   # Specular color (RGB)
+Ns 50            # Shininess
+
