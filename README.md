@@ -1,6 +1,5 @@
 # Penalty-Shootout
 ## 3D penalty soccer game built using C++ and OpenGL
-## By: Ali Kariapper(400134828), Hariesh Jay(400135582), Orlando Ortega(400051876), and Karanjot Sahni(400138529) ##
 
 ## Setup
 
@@ -18,6 +17,8 @@ Press Down Arrow to decrease upward momentum of the kick
 Press Left Arrow to angle kick to the left
 
 Press Right Arrow to angle kick to the right
+
+Press I to switch to ice hockey
 
 Press X to increase speed of the ball
 
