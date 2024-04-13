@@ -1,8 +1,6 @@
 #ifndef HOCKEYSTICK_H
 #define HOCKEYSTICK_H
 
-#include "objLoad.h"
-
 class Hockeystick {
 public:
     Point3D position;

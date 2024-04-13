@@ -21,6 +21,7 @@
 #include "ball.h"
 #include "puck.h"
 #include "post.h"
+#include "hockeystick.h"
 #include "SOIL.h"
 #include "imageio.h"
 using namespace std;
@@ -59,6 +60,7 @@ Vec3D currRing = Vec3D();
 
 Ball hockeyBall(0,0,0);
 Puck hockeyPuck(0,0,0);
+Hockeystick hockeystick;
 //Goalkeeper Initialization
 Goalkeeper gk = Goalkeeper(0.05, 1.35);
 
@@ -124,6 +126,32 @@ int width, height, bpp;
 
 int texImageWidth;
 int texImageHeight;
+
+
+void setupSpotlight() {
+    // Spotlight properties
+    GLfloat spot_direction[] = { -1.0, -1.0, -1.0, 0.0 };
+    GLfloat spot_cutoff[] = { 60.0 };
+    GLfloat spot_exponent[] = { 2.0 };
+    GLfloat spot_attenuation[] = { 0.0, 0.2, 0.0 }; // Changed to GLfloat array
+
+    // Enable lighting and define light properties
+    glEnable(GL_LIGHT1);
+    glLightfv(GL_LIGHT1, GL_POSITION, light_pos[1]);
+    glLightfv(GL_LIGHT1, GL_AMBIENT, amb[1]);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, diff[1]);
+    glLightfv(GL_LIGHT1, GL_SPECULAR, spec[1]);
+    
+    // Set spotlight parameters
+    glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot_direction);
+    glLightfv(GL_LIGHT1, GL_SPOT_CUTOFF, spot_cutoff);
+    glLightfv(GL_LIGHT1, GL_SPOT_EXPONENT, spot_exponent);
+    glLightfv(GL_LIGHT1, GL_CONSTANT_ATTENUATION, &spot_attenuation[0]); // Pass address
+    glLightfv(GL_LIGHT1, GL_LINEAR_ATTENUATION, &spot_attenuation[1]);   // Pass address
+    glLightfv(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, &spot_attenuation[2]); // Pass address
+}
+
+
 
 GLubyte *makeTexImage(char *file){
 	int width, height;
@@ -465,6 +493,7 @@ void draw3DScene(){
     
     glTranslatef(2,0,1);
     update();
+    hockeystick.draw();
     drawObject();
     glPopMatrix();    
     targets();
@@ -494,7 +523,7 @@ void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     draw3DScene();
-
+    //setupSpotlight(); 
     glutSwapBuffers();
 }
 
@@ -646,7 +675,7 @@ int main(int argc, char** argv)
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diff[0]);
     glLightfv(GL_LIGHT0, GL_SPECULAR, spec[0]);
 
-
+    //setupSpotlight();
     glutReshapeFunc(reshape);
 	glEnable(GL_DEPTH_TEST);
 

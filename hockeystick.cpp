@@ -14,16 +14,17 @@
 #include "objLoad.cpp"
 #include "hockeystick.h"
 
-objLoad loadHockeystick = objLoad("./hockey_stick.obj");
+objLoad loadHockeystick = objLoad("./hockey_stick2.obj");
 
 Hockeystick::Hockeystick() {
-    this->position = Point3D(0,0,0.5);
+    this->position = Point3D(0.0,0.7,1.0);
 }
 
 void Hockeystick::draw() {
     glPushMatrix();
     glTranslatef(this->position.px, this->position.py, this->position.pz);
-    glScalef(1,1,1);
+    glRotatef(140.0f, 1.0f, 0.0f, 0.0f);
+    glScalef(0.001f,0.001f,0.001f);
     loadHockeystick.draw();
     glPopMatrix();
 }
