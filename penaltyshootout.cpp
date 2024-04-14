@@ -102,30 +102,8 @@ GLfloat planeMaterialShiny =
     0.6
 ;
 
-//GLuint grassTextureID, iceTextureID;
 
-/*void loadTextures() {
-    // Load grass texture
-    grassTextureID = SOIL_load_OGL_texture(
-        "grass_texture.jpg", // File path for grass texture
-        SOIL_LOAD_AUTO,
-        SOIL_CREATE_NEW_ID,
-        SOIL_FLAG_INVERT_Y
-    );
-
-    // Load ice texture
-    iceTextureID = SOIL_load_OGL_texture(
-        "ice_texture.jpg", // File path for ice texture
-        SOIL_LOAD_AUTO,
-        SOIL_CREATE_NEW_ID,
-        SOIL_FLAG_INVERT_Y
-    );
-}*/
 unsigned char *image;
-int width, height, bpp;
-
-int texImageWidth;
-int texImageHeight;
 
 
 void setupSpotlight() {
@@ -151,26 +129,34 @@ void setupSpotlight() {
     glLightfv(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, &spot_attenuation[2]); // Pass address
 }
 
+int width, height, bpp;
 
+int texImageWidth;
+int texImageHeight;
 
 GLubyte *makeTexImage(char *file){
+	
 	int width, height;
 	GLubyte *texImage;
 	texImage = loadImageRGBA((char*) file, &width, &height);	
 	texImageWidth = width;
 	texImageHeight = height;
 	return texImage;
+	
+	
 }
 
-void load_texture(const char* filename){
-    unsigned int texture;
-    glGenTextures(1, &texture);
+unsigned int texture1;
+unsigned int texture2;
+void load_texture1(const char* filename){
+    
+    glGenTextures(1, &texture1);
     GLubyte *texImage = makeTexImage((char*)filename);
     if (!texImage) {
         printf("\nError reading image \n");
         return;
     }
-    glBindTexture(GL_TEXTURE_2D, texture);
+    glBindTexture(GL_TEXTURE_2D, texture1);
     // Set the texture wrapping/filtering options
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -178,8 +164,60 @@ void load_texture(const char* filename){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texImageWidth, texImageWidth, 0, GL_RGBA, GL_UNSIGNED_BYTE, texImage);
-    delete[] texImage;
+    delete[] texImage;    
 }
+
+void load_texture2(const char* filename){
+    
+    glGenTextures(1, &texture2);
+    GLubyte *texImage = makeTexImage((char*)filename);
+    if (!texImage) {
+        printf("\nError reading image \n");
+        return;
+    }
+    glBindTexture(GL_TEXTURE_2D, texture2);
+    // Set the texture wrapping/filtering options
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texImageWidth, texImageWidth, 0, GL_RGBA, GL_UNSIGNED_BYTE, texImage);
+    delete[] texImage;    
+}
+
+/*void load_texture(const char* filename, GLuint* texture) {
+    // Generate a new texture object
+    glGenTextures(1, texture);
+
+    // Bind the texture object
+    glBindTexture(GL_TEXTURE_2D, *texture);
+
+    // Load the image data
+    unsigned int texImageWidth, texImageHeight;
+    GLubyte *texImage = makeTexImage((char*)filename);
+    if (!texImage) {
+        printf("\nError reading image \n");
+        // Release the allocated texture memory
+        glDeleteTextures(1, texture);
+        return;
+    }
+
+    // Set the texture parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Specify the texture image data
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texImageWidth, texImageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, texImage);
+
+    // Free the allocated image data
+    delete[] texImage;
+
+    // Unbind the texture object
+    glBindTexture(GL_TEXTURE_2D, 0);
+}*/
 
 
 
@@ -304,18 +342,6 @@ void createPlane(){
     glEnable(GL_TEXTURE_2D); 
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
-    if(isWhiteGround) {
-        // Bind grass texture
-        //glBindTexture(GL_TEXTURE_2D, iceTextureID);
-        
-        //glColor3f(1.0f, 1.0f, 1.0f);
-    } else {
-        // Bind ice texture
-        //glBindTexture(GL_TEXTURE_2D, grassTextureID);
-        
-        //glColor3b(0,60,0);
-    }
-
     glBegin(GL_QUADS);
 
     glNormal3f(0,0,1);
@@ -324,13 +350,13 @@ void createPlane(){
     glTexCoord2f(0, 0);
     glVertex3f(-20,-10,0);
 
-    glTexCoord2f(1, 0);
+    glTexCoord2f(0.5, 0);
     glVertex3f(20,-10,0);
 
-    glTexCoord2f(1, 1);
+    glTexCoord2f(0.5, 0.5);
     glVertex3f(20,10,0);
 
-    glTexCoord2f(0, 1);
+    glTexCoord2f(0, 0.5);
     glVertex3f(-20,10, 0);
 
     glEnd();
@@ -525,21 +551,27 @@ void display()
     draw3DScene();
     //setupSpotlight(); 
     glutSwapBuffers();
+    
 }
 
 void kbd(unsigned char key, int x, int y)
 {
+    
     switch(key){
         
-        case 'i': 
+        /*case 'i': 
     	    isWhiteGround = !isWhiteGround;
             if(isWhiteGround) {
+            	glDeleteTextures( 1, &texture);
                 //load_texture("ice_texture.png");
+                //createPlane();
             } else {
-                //load_texture("grass_texture.png");
+            	glDeleteTextures( 1, &texture);
+                //load_texture("grasstexture.png");
+                //createPlane();
     	    }
     	    initObject();
-            break;
+            break;*/
 
         case 't':
             textX--;
@@ -634,10 +666,18 @@ void mouse(int btn, int state, int x, int y){
     }
 
 }
-
+void cleanUp() {
+    glDeleteTextures(1, &texture1);
+    glDeleteTextures(1, &texture2);
+}
 
 int main(int argc, char** argv)
-{
+{	
+    int choice;
+    cout << "Choose the texture to load:\n";
+    cout << "1. Grass texture\n";
+    cout << "2. Ice texture\n";
+    cin >> choice;
     printf("\n"
            "up arrow -> increase upward momentum of the kick\n"
            "down arrow -> decrease upward momentum of the kick\n"
@@ -687,13 +727,22 @@ int main(int argc, char** argv)
 	glLoadIdentity();
 	
         
-        //load_texture("grass_texture.png");
-        load_texture("ice_texture.png");
+        if (choice == 1) {
+        load_texture1("grass_texture.png");
+        isWhiteGround = false;
+        
+    } else if (choice == 2) {
+        load_texture2("ice_texture.png");
+        isWhiteGround = true;
+    } else {
+        cout << "Invalid choice. Exiting...\n";
+        return 1;
+    }
 	glutKeyboardFunc(kbd);
     glutSpecialFunc(SpecialInput);
 	glutDisplayFunc(display);
-
+	atexit(cleanUp);
 	glutMainLoop();
-
+	
 	return 0;
 }
