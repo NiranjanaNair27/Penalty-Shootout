@@ -633,9 +633,9 @@ void cleanUp() {
 int main(int argc, char** argv)
 {	
     int choice;
-    cout << "Choose the texture to load:\n";
-    cout << "1. Grass texture\n";
-    cout << "2. Ice texture\n";
+    cout << "Choose the game to play: \n";
+    cout << "1. Grass hockey\n";
+    cout << "2. Ice hockey\n";
     cin >> choice;
     printf("\n"
            "up arrow -> increase upward momentum of the kick\n"
