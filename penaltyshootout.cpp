@@ -58,9 +58,13 @@ bool isWhiteGround = false;
 
 Vec3D currRing = Vec3D();
 
+//Ball and Puck initialised
 Ball hockeyBall(0,0,0);
 Puck hockeyPuck(0,0,0);
+
+//Hockeystick initialised
 Hockeystick hockeystick;
+
 //Goalkeeper Initialization
 Goalkeeper gk = Goalkeeper(0.05, 1.35);
 
@@ -102,25 +106,26 @@ GLfloat planeMaterialShiny =
     0.6
 ;
 
-
+//texture global variables
 unsigned char *image;
-
+int width, height, bpp;
+int texImageWidth;
+int texImageHeight;
 
 void setupSpotlight() {
-    // Spotlight properties
     GLfloat spot_direction[] = { -1.0, -1.0, -1.0, 0.0 };
     GLfloat spot_cutoff[] = { 60.0 };
     GLfloat spot_exponent[] = { 2.0 };
-    GLfloat spot_attenuation[] = { 0.0, 0.2, 0.0 }; // Changed to GLfloat array
+    GLfloat spot_attenuation[] = { 0.0, 0.2, 0.0 };
 
-    // Enable lighting and define light properties
+    // enable lighting 
     glEnable(GL_LIGHT1);
     glLightfv(GL_LIGHT1, GL_POSITION, light_pos[1]);
     glLightfv(GL_LIGHT1, GL_AMBIENT, amb[1]);
     glLightfv(GL_LIGHT1, GL_DIFFUSE, diff[1]);
     glLightfv(GL_LIGHT1, GL_SPECULAR, spec[1]);
     
-    // Set spotlight parameters
+    // spotlight parameters
     glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, spot_direction);
     glLightfv(GL_LIGHT1, GL_SPOT_CUTOFF, spot_cutoff);
     glLightfv(GL_LIGHT1, GL_SPOT_EXPONENT, spot_exponent);
@@ -129,10 +134,7 @@ void setupSpotlight() {
     glLightfv(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, &spot_attenuation[2]); // Pass address
 }
 
-int width, height, bpp;
 
-int texImageWidth;
-int texImageHeight;
 
 GLubyte *makeTexImage(char *file){
 	
@@ -146,8 +148,10 @@ GLubyte *makeTexImage(char *file){
 	
 }
 
+//texture for ice and grass
 unsigned int texture1;
 unsigned int texture2;
+
 void load_texture1(const char* filename){
     
     glGenTextures(1, &texture1);
@@ -157,7 +161,7 @@ void load_texture1(const char* filename){
         return;
     }
     glBindTexture(GL_TEXTURE_2D, texture1);
-    // Set the texture wrapping/filtering options
+    // set texture wrapping/filtering options
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -176,7 +180,6 @@ void load_texture2(const char* filename){
         return;
     }
     glBindTexture(GL_TEXTURE_2D, texture2);
-    // Set the texture wrapping/filtering options
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -185,41 +188,6 @@ void load_texture2(const char* filename){
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texImageWidth, texImageWidth, 0, GL_RGBA, GL_UNSIGNED_BYTE, texImage);
     delete[] texImage;    
 }
-
-/*void load_texture(const char* filename, GLuint* texture) {
-    // Generate a new texture object
-    glGenTextures(1, texture);
-
-    // Bind the texture object
-    glBindTexture(GL_TEXTURE_2D, *texture);
-
-    // Load the image data
-    unsigned int texImageWidth, texImageHeight;
-    GLubyte *texImage = makeTexImage((char*)filename);
-    if (!texImage) {
-        printf("\nError reading image \n");
-        // Release the allocated texture memory
-        glDeleteTextures(1, texture);
-        return;
-    }
-
-    // Set the texture parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Specify the texture image data
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texImageWidth, texImageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, texImage);
-
-    // Free the allocated image data
-    delete[] texImage;
-
-    // Unbind the texture object
-    glBindTexture(GL_TEXTURE_2D, 0);
-}*/
-
-
 
 void drawObject() {
     if (isWhiteGround) {
@@ -279,14 +247,10 @@ void drawHUD(){
     glRasterPos2i(0, 0);
     glPopMatrix();
 
-    // unsigned char text[] = "";
-
     if ( AtMenu){ //game hasn't started
 
             const char textIntro[] 
                 = "WELCOME TO PENALTY SHOOT OUT! \n  \nTO GET STARTED PRESS THE 'S' KEY!";
-            //int lengtext = glutBitmapLength(GLUT_BITMAP_8_BY_13, text);
-            //glutBitmapString(GLUT_BITMAP_HELVETICA_18, (unsigned char*) text );
             for (int i = 0; i < strlen(textIntro); i++){
                 glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, textIntro[i]);
             }
@@ -305,7 +269,6 @@ void drawHUD(){
         char buf[256];
         snprintf(buf, sizeof(buf) - 1, "YOU HAVE %d SECONDS REMAINING, %d POINTS SCORED", 60 - cnt/60, score);
         int track = 60 - cnt/60;
-        //glutBitmapString(GLUT_BITMAP_HELVETICA_18, (unsigned char*) buf );
         for (int i = 0; i < strlen(buf); i++){
                 glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, buf[i]);
             }
@@ -320,14 +283,11 @@ void drawHUD(){
 
         char buf[256];
         snprintf(buf, sizeof(buf) - 1, "GAME OVER!!\nYou scored %d points!", score);
-        //glutBitmapString(GLUT_BITMAP_HELVETICA_18, (unsigned char*) buf );
         for (int i = 0; i < strlen(buf); i++){
                 glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, buf[i]);
             }
 
     }
-
-    // glutBitmapString(GLUT_BITMAP_HELVETICA_18, text );
 }
 
 void createPlane(){
@@ -338,7 +298,7 @@ void createPlane(){
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, planeMaterialSpecular);
     glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, planeMaterialShiny);
 
-    // Enable texture mapping
+    //texture mapping
     glEnable(GL_TEXTURE_2D); 
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
@@ -346,7 +306,7 @@ void createPlane(){
 
     glNormal3f(0,0,1);
 
-// Specify texture coordinates
+    //texture coordinates
     glTexCoord2f(0, 0);
     glVertex3f(-20,-10,0);
 
@@ -361,7 +321,7 @@ void createPlane(){
 
     glEnd();
 
-    glDisable(GL_TEXTURE_2D); // Disable texture mapping after use
+    glDisable(GL_TEXTURE_2D); //disable texture mapping 
     glPopMatrix();
 }
 
@@ -445,6 +405,7 @@ void targets(){
 void update() {
     if (gameOngoing) {
         if (isWhiteGround) {
+        	//puck logic
         	if (hockeyPuck.position.px >= 45) {
                 initObject();
                 skey = false;
@@ -468,7 +429,7 @@ void update() {
                 }
             }
         } else {
-            // Update ball logic
+            //ball logic
             if (hockeyBall.position.px >= 45) {
                 initObject();
                 skey = false;
@@ -512,11 +473,8 @@ void draw3DScene(){
 
     // Static view of end of field
     gluLookAt(0,0,2,    20, 0 , 0,      0, 0, 1);
-
-    //gluLookAt(0,0,2, 2, mouseX*100 , mouseY*100, 0, 0, 1);
   
-    glPushMatrix();
-    
+    glPushMatrix();   
     glTranslatef(2,0,1);
     update();
     hockeystick.draw();
@@ -549,7 +507,7 @@ void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     draw3DScene();
-    //setupSpotlight(); 
+    setupSpotlight(); 
     glutSwapBuffers();
     
 }
@@ -666,6 +624,8 @@ void mouse(int btn, int state, int x, int y){
     }
 
 }
+
+//for deleting textures
 void cleanUp() {
     glDeleteTextures(1, &texture1);
     glDeleteTextures(1, &texture2);
@@ -683,7 +643,6 @@ int main(int argc, char** argv)
            "down arrow -> decrease upward momentum of the kick\n"
            "left arrow -> angle kick to the left\n"
            "right arrow -> angle kick to the right\n"
-           "i-> change to ice hockey\n"
            "x -> increase speed of the ball\n"
            "c -> decrease speed of the ball\n"
            "r -> reset\n"
@@ -715,7 +674,6 @@ int main(int argc, char** argv)
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diff[0]);
     glLightfv(GL_LIGHT0, GL_SPECULAR, spec[0]);
 
-    //setupSpotlight();
     glutReshapeFunc(reshape);
 	glEnable(GL_DEPTH_TEST);
 
@@ -726,7 +684,7 @@ int main(int argc, char** argv)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	
-        
+        //textures added
         if (choice == 1) {
         load_texture1("grass_texture.png");
         isWhiteGround = false;
