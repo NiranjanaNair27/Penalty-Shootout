@@ -50,21 +50,21 @@ void Post::drawNet()
     //top
     glPushMatrix();
         glTranslatef(18, 0, 2.42);
-        glScalef(0.5, 15, 0.75); // Adjust scale factors to scale down
+        glScalef(0.5, 15, 0.75); 
         this->drawPostIndex();
     glPopMatrix();
 
     //right
     glPushMatrix();
         glTranslatef(18, 1.9, 1.2);
-        glScalef(0.5, 0.5, 5.875); // Adjust scale factors to scale down
+        glScalef(0.5, 0.5, 5.875);
         this->drawPostIndex();
     glPopMatrix();
 
     //left
     glPushMatrix();
         glTranslatef(18, -1.9, 1.2);
-        glScalef(0.5, 0.5, 5.875); // Adjust scale factors to scale down
+        glScalef(0.5, 0.5, 5.875);
         this->drawPostIndex();
     glPopMatrix();
 }*/

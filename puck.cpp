@@ -48,10 +48,6 @@ void Puck::update(){
     this->position.px = this->position.px + this->direction.dx*this->speed;
     this->position.pz = this->position.pz - 0.05*this->gravity;
 
-    // if ( this->position.pz < 0){
-    //     this->position.pz = 0;
-    // }
-
 
 
 }
@@ -60,10 +56,9 @@ void Puck::draw() {
     glPushMatrix();
     glColor3f(0, 0, 0);
     glTranslatef(this->position.px, this->position.py, this->position.pz);
-    //glRotatef(90, 1, 0, 0); // Rotate the cylinder to stand upright
     glScalef(0.1, 0.1, 0.1);
 
-    // Draw the cylinder
+
     glBegin(GL_QUAD_STRIP);
     for (int i = 0; i <= 360; i += 10) {
         float angle = i * 3.1415926 / 180;
@@ -75,26 +70,26 @@ void Puck::draw() {
     }
     glEnd();
 
-    // Draw the top and bottom circles of the cylinder
+    //top and bottom faces
     glBegin(GL_TRIANGLE_FAN);
-    glVertex3f(0.0f, 0.0f, 0.0f);   // Center of the circle
+    glVertex3f(0.0f, 0.0f, 0.0f);   //center of the circle
     for (int i = 0; i <= 360; i += 10) {
         float angle = i * 3.1415926 / 180;
         float x = cos(angle);
         float y = sin(angle);
 
-        glVertex3f(x, y, 0.0f);      // Circle vertex
+        glVertex3f(x, y, 0.0f);      
     }
     glEnd();
     glColor3f(1, 1, 1);
     glBegin(GL_TRIANGLE_FAN);
-    glVertex3f(0.0f, 0.0f, 0.5f);   // Center of the circle
+    glVertex3f(0.0f, 0.0f, 0.5f);   //center of the circle
     for (int i = 0; i <= 360; i += 10) {
         float angle = i * 3.1415926 / 180;
         float x = cos(angle);
         float y = sin(angle);
 
-        glVertex3f(x, y, 0.5f);      // Circle vertex
+        glVertex3f(x, y, 0.5f);      
     }
     glEnd();
 

@@ -22,7 +22,6 @@
 #include "puck.h"
 #include "post.h"
 #include "hockeystick.h"
-#include "SOIL.h"
 #include "imageio.h"
 using namespace std;
 

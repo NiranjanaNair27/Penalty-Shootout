@@ -70,51 +70,6 @@ void Ball::draw(){
     glPopMatrix();
 }
 
-/*void Ball::draw() {
-    glPushMatrix();
-    glColor3f(0, 0, 0);
-    glTranslatef(this->position.px, this->position.py, this->position.pz);
-    //glRotatef(90, 1, 0, 0); // Rotate the cylinder to stand upright
-    glScalef(0.1, 0.1, 0.1);
-
-    // Draw the cylinder
-    glBegin(GL_QUAD_STRIP);
-    for (int i = 0; i <= 360; i += 10) {
-        float angle = i * 3.1415926 / 180;
-        float x = cos(angle);
-        float y = sin(angle);
-
-        glVertex3f(x, y, 0.0f);      // Bottom vertex
-        glVertex3f(x, y, 0.5f);      // Top vertex
-    }
-    glEnd();
-
-    // Draw the top and bottom circles of the cylinder
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex3f(0.0f, 0.0f, 0.0f);   // Center of the circle
-    for (int i = 0; i <= 360; i += 10) {
-        float angle = i * 3.1415926 / 180;
-        float x = cos(angle);
-        float y = sin(angle);
-
-        glVertex3f(x, y, 0.0f);      // Circle vertex
-    }
-    glEnd();
-    glColor3f(1, 1, 1);
-    glBegin(GL_TRIANGLE_FAN);
-    glVertex3f(0.0f, 0.0f, 0.5f);   // Center of the circle
-    for (int i = 0; i <= 360; i += 10) {
-        float angle = i * 3.1415926 / 180;
-        float x = cos(angle);
-        float y = sin(angle);
-
-        glVertex3f(x, y, 0.5f);      // Circle vertex
-    }
-    glEnd();
-
-    glPopMatrix();
-}*/
-
 
 
 
