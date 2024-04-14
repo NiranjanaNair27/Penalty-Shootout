@@ -56,6 +56,7 @@ class Post {
         void setColors(float r, float g, float b);
 
         void drawNet();
+        //void loadTexture(const char* filename)
 
     private:
         void drawPost(int index);

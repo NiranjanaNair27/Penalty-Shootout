@@ -471,7 +471,12 @@ void draw3DScene(){
     glLoadIdentity();
 
     // Static view of end of field
-    gluLookAt(0,0,2,    20, 0 , 0,      0, 0, 1);
+    //gluLookAt(0,0,2,    20, 0 , 0,      0, 0, 1);
+    
+    float eyeY = 20 * sin(ang * 3.14159 / 180);
+    gluLookAt(0, eyeY, 2,    //updated eye position
+              20, 0 , 0,     
+              0, 0, 1);
   
     glPushMatrix();   
     glTranslatef(2,0,1);
@@ -487,7 +492,7 @@ void draw3DScene(){
     drawPath();
     post.drawNet();
 
-    ang++;
+    
 }
 
 
@@ -515,6 +520,14 @@ void kbd(unsigned char key, int x, int y)
 {
     
     switch(key){
+    	case 'd':
+            if (ang > -4) // Check if within left rotation bounds
+                ang--;     // Rotate 1 degree to the left
+            break;
+        case 'a':
+            if (ang < 4)  // Check if within right rotation bounds
+                ang++;     // Rotate 1 degree to the right
+            break;
         
         /*case 'i': 
     	    isWhiteGround = !isWhiteGround;
