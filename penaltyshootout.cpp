@@ -30,19 +30,28 @@ int gHeight = 400;
 int gWidth = 400;
 int ang = 0;	
 int cnt = 0;
-float eye[3] = {20,20,20};
-float light_pos[2][4] = {{3,5,0,1}, {1,-5,0,1} };
-float amb[2][4] = { { 0.976470588, 0.843137255,1, 1} , {0,0.2,1,0.5} };
-float diff[2][4] = { {0,0,1,1} , {1,0,0,1}  };
-float spec[2][4] = { {1,1,1,1}, {1,0,1,1}  };
+float eye[3] = {20,20,20}; //point of view initialised
+
+//lighting metrics
+float light_pos[2][4] = {{3,5,7,1}, {10,10,10,1} };
+float amb[2][4] = { { 0.9, 0.8,1, 1} , {0.6,0.3,0.5,1.0} };
+float diff[2][4] = { {0,0,1,0.5} , {0.9,0.9,0.5,1.0}  };
+float spec[2][4] = { {1,1,1,1}, {1,1,1,1}  };
+
+//mouse controls
 float mouseX = 0;
 float mouseY = 0;
+
+//booleans for game states
 bool AtMenu = true;
 bool gameOngoing = false;
 bool gameOverScreen = true;
 int textX = 0;
 bool isLeftPressed = false;
 bool isRightPressed = false;
+bool isWhiteGround = false;
+
+//speed and direction initialisation
 int score = 0;
 const float SPEEDXMINIMUM = 0.3;
 const float DIRYMINIMUM = 0;
@@ -51,7 +60,7 @@ float speedX = SPEEDXMINIMUM;
 float forceZ = FORCEZMINIMUM;
 float dirY = DIRYMINIMUM;
 float skey = false;
-bool isWhiteGround = false;
+
 
 
 
@@ -92,18 +101,11 @@ GLfloat materialShiny[3] = {
     0.9
 };
 
-GLfloat planeMaterialAmbient[4] = 
-    { 0.9, 0.1 ,1, 1 }
-;
-GLfloat planeMaterialDiffuse[4] = 
-    {0.184313725, 0.458823529 ,0.196078431, 1 };
+GLfloat planeMaterialAmbient[] = { 0, 0 ,0, 1 };
+GLfloat planeMaterialDiffuse[] = { 0.184313725, 0.458823529 ,0.196078431, 1 };
+GLfloat planeMaterialSpecular[] = { 0.0, 0.0, 0.0, 1 };
+GLfloat planeMaterialShiny = 120.0;
 
-GLfloat planeMaterialSpecular[4] = 
-    { 0.0, 0.0, 0.0, 1 };
-
-GLfloat planeMaterialShiny = 
-    0.6
-;
 
 //texture global variables
 unsigned char *image;
@@ -111,11 +113,12 @@ int width, height, bpp;
 int texImageWidth;
 int texImageHeight;
 
+//spotlight function
 void setupSpotlight() {
-    GLfloat spot_direction[] = { -1.0, -1.0, -1.0, 0.0 };
+    GLfloat spot_direction[] = { -0.5, 1.0, 0.0, 0.0 };
     GLfloat spot_cutoff[] = { 60.0 };
     GLfloat spot_exponent[] = { 2.0 };
-    GLfloat spot_attenuation[] = { 0.0, 0.2, 0.0 };
+    GLfloat spot_attenuation[] = { 0.0, 0.1, 0.0 };
 
     // enable lighting 
     glEnable(GL_LIGHT1);
@@ -134,7 +137,7 @@ void setupSpotlight() {
 }
 
 
-
+//image to texture
 GLubyte *makeTexImage(char *file){
 	
 	int width, height;
@@ -150,7 +153,7 @@ GLubyte *makeTexImage(char *file){
 //texture for ice and grass
 unsigned int texture1;
 unsigned int texture2;
-
+unsigned int textureSky;
 void load_texture1(const char* filename){
     
     glGenTextures(1, &texture1);
@@ -170,6 +173,7 @@ void load_texture1(const char* filename){
     delete[] texImage;    
 }
 
+
 void load_texture2(const char* filename){
     
     glGenTextures(1, &texture2);
@@ -186,6 +190,13 @@ void load_texture2(const char* filename){
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, texImageWidth, texImageWidth, 0, GL_RGBA, GL_UNSIGNED_BYTE, texImage);
     delete[] texImage;    
+}
+void loadGroundTexture(bool isWhiteGround) {
+    if (isWhiteGround) {
+        load_texture2("ice_texture.png"); // Load ice texture
+    } else {
+        load_texture1("grass2.png"); // Load grass texture
+    }
 }
 
 void drawObject() {
@@ -204,6 +215,7 @@ void setMaterials(unsigned int index) {
 
 }
 
+//3D path of ball/puck drawn
 void drawPath(){
     glPointSize(5);
     glBegin(GL_POINTS);
@@ -239,6 +251,7 @@ void drawPath(){
     glEnd();
 }
 
+//Heads-Up display for information
 void drawHUD(){
     glPushMatrix();
     glTranslatef(60,20,15);
@@ -249,7 +262,7 @@ void drawHUD(){
     if ( AtMenu){ //game hasn't started
 
             const char textIntro[] 
-                = "WELCOME TO PENALTY SHOOT OUT! \n  \nTO GET STARTED PRESS THE 'S' KEY!";
+                = "WELCOME TO HOCKEY SHOOT OUT! \n  \nTO GET STARTED PRESS THE 'S' KEY!";
             for (int i = 0; i < strlen(textIntro); i++){
                 glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, textIntro[i]);
             }
@@ -289,7 +302,10 @@ void drawHUD(){
     }
 }
 
+
+//plane with texture initialised
 void createPlane(){
+    loadGroundTexture(isWhiteGround);
     glPushMatrix();
 
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, planeMaterialAmbient);
@@ -308,15 +324,19 @@ void createPlane(){
     //texture coordinates
     glTexCoord2f(0, 0);
     glVertex3f(-20,-10,0);
+    //glVertex3f(-10,-5,0);
 
     glTexCoord2f(0.5, 0);
     glVertex3f(20,-10,0);
+    //glVertex3f(10,-5,0);
 
     glTexCoord2f(0.5, 0.5);
     glVertex3f(20,10,0);
+    //glVertex3f(10,5,0);
 
     glTexCoord2f(0, 0.5);
     glVertex3f(-20,10, 0);
+    //glVertex3f(-10,5,0);
 
     glEnd();
 
@@ -340,6 +360,7 @@ void reshape( int w, int h){
     glutPostRedisplay();
 }
 
+
 void initObject() {
     if (isWhiteGround) {
         hockeyPuck = Puck(forceZ , dirY, speedX);  // Initialize puck
@@ -348,6 +369,7 @@ void initObject() {
     }
 }
 
+//target initialisation and control
 void targets(){
     int track = 60 - cnt/60;
     switch (track){
@@ -400,7 +422,7 @@ void targets(){
 }
 
 
-
+//updation for both ball/puck handled
 void update() {
     if (gameOngoing) {
         if (isWhiteGround) {
@@ -469,21 +491,19 @@ void draw3DScene(){
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
-    // Static view of end of field
-    //gluLookAt(0,0,2,    20, 0 , 0,      0, 0, 1);
     
-    float eyeY = 20 * sin(ang * 3.14159 / 180);
-    gluLookAt(0, eyeY, 2,    //updated eye position
+    float eyeY = 20 * sin(ang * 3.14159 / 180); //Y coordinate of eye changing with angle
+    gluLookAt(0, eyeY, 2, //updated eye position
               20, 0 , 0,     
               0, 0, 1);
-  
+    
+    //objects initialised in order
     glPushMatrix();   
     glTranslatef(2,0,1);
     update();
     hockeystick.draw();
     drawObject();
-    glPopMatrix();    
+    glPopMatrix(); 
     targets();
     gk.drawGK();
     gk.gkSideways();
@@ -491,8 +511,6 @@ void draw3DScene(){
     drawHUD();
     drawPath();
     post.drawNet();
-
-    
 }
 
 
@@ -511,56 +529,40 @@ void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     draw3DScene();
-    setupSpotlight(); 
     glutSwapBuffers();
     
 }
 
+//keyboard controls
 void kbd(unsigned char key, int x, int y)
 {
     
     switch(key){
-    	case 'd':
-            if (ang > -4) // Check if within left rotation bounds
-                ang--;     // Rotate 1 degree to the left
+    	case 'd'://a and d for perspective change
+            if (ang > -3) 
+                ang--;     
             break;
         case 'a':
-            if (ang < 4)  // Check if within right rotation bounds
-                ang++;     // Rotate 1 degree to the right
+            if (ang < 3)  
+                ang++;     
             break;
-        
-        /*case 'i': 
-    	    isWhiteGround = !isWhiteGround;
-            if(isWhiteGround) {
-            	glDeleteTextures( 1, &texture);
-                //load_texture("ice_texture.png");
-                //createPlane();
-            } else {
-            	glDeleteTextures( 1, &texture);
-                //load_texture("grasstexture.png");
-                //createPlane();
-    	    }
-    	    initObject();
-            break;*/
-
         case 't':
             textX--;
             break;
-        case 'q':
-        case 27:
+        case 27://esc key
             exit(0);
             break;
-        case 's':
+        case 's'://start
             if (cnt/60 < 60){
                 AtMenu = false;
                 gameOngoing = true;
                 skey = !skey;
             }
             break;
-        case 'x':
+        case 'x'://increase speed of ball
             speedX += 0.1;
             break;
-        case 'c':
+        case 'c'://decrease speed of ball
             speedX -= 0.1;
             break;
         case ' ':
@@ -568,7 +570,7 @@ void kbd(unsigned char key, int x, int y)
                 initObject();
             }
             break;
-        case '1':
+        case '1'://Goalkeeper difficulty changes
             gk = Goalkeeper(0.025,1);
             break;
         case '2':
@@ -577,7 +579,7 @@ void kbd(unsigned char key, int x, int y)
         case '3':
             gk = Goalkeeper(0.1, 1.75);
             break;
-        case 'r':
+        case 'r'://reset
             initObject();
             gk = Goalkeeper(0.05, 1.35);
             score = 0;
@@ -587,6 +589,7 @@ void kbd(unsigned char key, int x, int y)
 
 }
 
+//direction and momentum changers
 void SpecialInput(int key, int x, int y)
 {
     switch(key)
@@ -617,6 +620,7 @@ void updateMousePos(int x, int y){
     
 }
 
+//mouse controls
 void mouse(int btn, int state, int x, int y){
     mouseX = x;
     mouseY = y;
@@ -641,6 +645,7 @@ void mouse(int btn, int state, int x, int y){
 void cleanUp() {
     glDeleteTextures(1, &texture1);
     glDeleteTextures(1, &texture2);
+    glDeleteTextures(1, &textureSky);
 }
 
 int main(int argc, char** argv)
@@ -665,21 +670,19 @@ int main(int argc, char** argv)
     );
 
     glutInit(&argc, argv);
-	glutInitWindowSize(800, 800);
-	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-	glutCreateWindow("Penalty Shootout");
-	glutTimerFunc(0, FPS, 0);
+    glutInitWindowSize(800, 800);
+    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+    glutCreateWindow("Penalty Shootout");
+    glutTimerFunc(0, FPS, 0);
     glutPassiveMotionFunc(updateMousePos);
     glutMotionFunc(updateMousePos);
     glutMouseFunc(mouse);
-   
-	glClearColor(0.5294117647,0.807,0.98, 0.8);
+    glClearColor(0.5294117647,0.807,0.98, 0.8);
 
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_LIGHT1);
-
 
     glLightfv(GL_LIGHT0, GL_POSITION, light_pos[0]);
     glLightfv(GL_LIGHT0, GL_AMBIENT, amb[0]);
@@ -687,32 +690,31 @@ int main(int argc, char** argv)
     glLightfv(GL_LIGHT0, GL_SPECULAR, spec[0]);
 
     glutReshapeFunc(reshape);
-	glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_TEST);
 
     glEnable(GL_CULL_FACE);
     glCullFace( GL_BACK );
     
-
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
+    setupSpotlight();//spotlight
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
 	
-        //textures added
-        if (choice == 1) {
-        load_texture1("grass_texture.png");
-        isWhiteGround = false;
+    //textures added
+    if (choice == 1) {
+    isWhiteGround = false;
         
     } else if (choice == 2) {
-        load_texture2("ice_texture.png");
         isWhiteGround = true;
     } else {
         cout << "Invalid choice. Exiting...\n";
         return 1;
     }
-	glutKeyboardFunc(kbd);
+    
+    glutKeyboardFunc(kbd);
     glutSpecialFunc(SpecialInput);
-	glutDisplayFunc(display);
-	atexit(cleanUp);
-	glutMainLoop();
+    glutDisplayFunc(display);
+    atexit(cleanUp);//texture variable deletion
+    glutMainLoop();
 	
-	return 0;
+    return 0;
 }

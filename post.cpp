@@ -4,71 +4,10 @@
 #include <GL/glut.h>
 #include "imageio.h"
 
-/*Post::Post()
-{
-    // Number of cube faces
-    this->numFaces = 6;
-
-    // Load texture
-    loadTexture("post_texture.png");
-}
-
-void Post::loadTexture(const char* filename)
-{
-    // Generate texture ID
-    glGenTextures(1, &textureID);
-
-    // Bind texture
-    glBindTexture(GL_TEXTURE_2D, textureID);
-
-    // Set texture parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Load image
-    int width, height, bpp;
-    unsigned char* image = loadImageRGBA(filename, &width, &height, &bpp);
-
-    // Assign texture image
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-
-    // Free image data
-    freeImage(image);
-
-    // Unbind texture
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void Post::drawPostIndex()
-{
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    for (int i = 0; i < this->numFaces; i++)
-    {
-        this->drawPost(i);
-    }
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-void Post::drawPost(int index)
-{
-    glBegin(GL_POLYGON);
-    glTexCoord2f(0.0, 0.0);
-    glVertex3fv(this->postVerts[index][0]);
-    glTexCoord2f(1.0, 0.0);
-    glVertex3fv(this->postVerts[index][1]);
-    glTexCoord2f(1.0, 1.0);
-    glVertex3fv(this->postVerts[index][2]);
-    glTexCoord2f(0.0, 1.0);
-    glVertex3fv(this->postVerts[index][3]);
-    glEnd();
-}*/
-
 Post::Post()
 {
-    //set post colors to white
-    this->setColors(1,1,1);
+    //set post colors to brown
+    this->setColors(0.547, 0.165, 0.165);
 
     //number of cube faces
     this->numFaces = 6;
@@ -122,6 +61,15 @@ void Post::setColors(float r, float g, float b)
 
 void Post::drawPost(int index)
 {
+    GLfloat materialAmbient[] = { this->postColor[0], this->postColor[1], this->postColor[2], 1.0 };
+    GLfloat materialDiffuse[] = { 0.0, 0.0, 0.0, 1.0 };  // No diffuse reflection
+    GLfloat materialSpecular[] = { 1.0, 1.0, 1.0, 1.0 }; // White specular reflection
+    GLfloat materialShininess = 100.0;  // Increase the shininess factor
+    
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, materialAmbient);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, materialDiffuse);
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, materialSpecular);
+    glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, materialShininess);
     glBegin(GL_POLYGON);
     for (int i = 0; i < 4; i++)
     {
